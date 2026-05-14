@@ -9,10 +9,12 @@ export default function NpcCard({ npc }) {
         <p className="eyebrow">本关 NPC</p>
         <h3>{npc.name}</h3>
         <p>{npc.desc}</p>
+        {npc.skill && <p className="npc-skill">技能：{npc.skill}</p>}
       </div>
       <div className="npc-meta">
         <span>难度 {npc.difficulty}</span>
         <span>偏好：{preferred}</span>
+        {npc.role && <span>{npc.role}</span>}
       </div>
     </section>
   );

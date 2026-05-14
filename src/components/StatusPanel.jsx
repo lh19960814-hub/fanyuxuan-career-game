@@ -24,7 +24,22 @@ export default function StatusPanel({ player }) {
       <div className="status-card">
         <span>战绩</span>
         <strong>{player.winCount}胜 / {player.loseCount}败</strong>
-        <small>当前第 {player.winCount + player.loseCount + 1} 关</small>
+        <small>第 {player.round || 1} / {player.maxRounds || 14} 回合</small>
+      </div>
+      <div className="status-card compact-stat">
+        <span>压力</span>
+        <strong>{player.pressure ?? 0}/100</strong>
+        <small>满了会提前沉淀</small>
+      </div>
+      <div className="status-card compact-stat">
+        <span>口碑 / 谣言</span>
+        <strong>{player.reputation ?? 0} / {player.gossip ?? 0}</strong>
+        <small>影响朋友局结局</small>
+      </div>
+      <div className="status-card compact-stat">
+        <span>材料 / 协调</span>
+        <strong>{player.paperwork ?? 0} / {player.social ?? 0}</strong>
+        <small>肉鸽路线核心属性</small>
       </div>
     </section>
   );

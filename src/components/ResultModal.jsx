@@ -1,4 +1,4 @@
-export default function ResultModal({ result, onNext, onRetry, onClose }) {
+export default function ResultModal({ result, onNext, onRetry, onClose, onChooseReward }) {
   if (!result) return null;
 
   const isWin = result.type === 'win';
@@ -19,19 +19,33 @@ export default function ResultModal({ result, onNext, onRetry, onClose }) {
                 {result.reward.levelUps.map((item) => `${item.from} -> ${item.to}`).join('，')}
               </div>
             )}
-            {result.reward.equipment && <div>获得装备：{result.reward.equipment.name}</div>}
-            {result.reward.buff && <div>获得 Buff：{result.reward.buff.name}</div>}
             <div>角色变化：范宇轩的气质又往上走了一格。</div>
           </div>
         )}
 
+        {isWin && result.reward.rewardOptions?.length > 0 && (
+          <>
+          <p className="reward-hint">选择一项战利品，进入下一回合。</p>
+          <div className="reward-choice-list">
+            {result.reward.rewardOptions.map((choice) => (
+              <button className="reward-choice" key={choice.id} onClick={() => onChooseReward(choice)}>
+                <strong>{choice.title}</strong>
+                <span>{choice.desc}</span>
+                <small>{choice.effectText}</small>
+              </button>
+            ))}
+          </div>
+          </>
+        )}
+
         <div className="modal-actions">
-          {isWin ? (
+          {isWin && !result.reward.rewardOptions?.length ? (
             <button className="button button--primary" onClick={onNext}>下一关</button>
-          ) : (
-            <button className="button button--primary" onClick={onRetry}>重新挑战</button>
-          )}
-          <button className="button button--ghost" onClick={onClose}>先看看状态</button>
+          ) : null}
+          {!isWin ? (
+            <button className="button button--primary" onClick={onRetry}>继续下一回合</button>
+          ) : null}
+          {!isWin && <button className="button button--ghost" onClick={onClose}>先看看状态</button>}
         </div>
       </section>
     </div>

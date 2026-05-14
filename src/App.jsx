@@ -3,7 +3,7 @@ import HomePage from './components/HomePage';
 import GamePage from './components/GamePage';
 import CompletionPage from './components/CompletionPage';
 import { clearSave, hasSave, loadSave, saveGame } from './utils/storage';
-import { createInitialPlayer } from './utils/gameLogic';
+import { createInitialPlayer, migratePlayerSave } from './utils/gameLogic';
 
 export default function App() {
   const [screen, setScreen] = useState('home');
@@ -37,7 +37,7 @@ export default function App() {
   function continueGame() {
     const saved = loadSave();
     if (saved) {
-      setPlayer(saved);
+      setPlayer(migratePlayerSave(saved));
       setScreen(saved.isCompleted ? 'complete' : 'game');
     }
   }
