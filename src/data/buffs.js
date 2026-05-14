@@ -1,0 +1,42 @@
+export const buffPool = [
+  {
+    id: 'hot-state',
+    name: '今日状态火热',
+    desc: '下一关获得额外经验。',
+    duration: 1,
+    effectType: 'extraExp',
+    effectValue: 12,
+  },
+  {
+    id: 'leader-like',
+    name: '领导赏识',
+    desc: '下一关经验翻倍。',
+    duration: 1,
+    effectType: 'doubleExp',
+    effectValue: 2,
+  },
+  {
+    id: 'lucky-rps',
+    name: '好运连连',
+    desc: '猜拳时多一点玄学优势。',
+    duration: 2,
+    effectType: 'rpsLuck',
+    effectValue: 1,
+  },
+  {
+    id: 'focus-mode',
+    name: '专注模式',
+    desc: '点击反应挑战更有优势。',
+    duration: 2,
+    effectType: 'reactionFocus',
+    effectValue: 80,
+  },
+  {
+    id: 'calm-judgement',
+    name: '冷静判断',
+    desc: '21 点中更容易把握分寸。',
+    duration: 2,
+    effectType: 'blackjackCalm',
+    effectValue: 1,
+  },
+];
