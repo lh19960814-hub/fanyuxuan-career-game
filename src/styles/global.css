@@ -148,7 +148,7 @@ p {
 .guide-section,
 .panel,
 .npc-card,
-.status-card,
+.status-hud,
 .completion-card {
   border: 1px solid rgba(95, 111, 137, 0.16);
   border-radius: 8px;
@@ -166,8 +166,7 @@ p {
   gap: 16px;
 }
 
-.guide-grid div,
-.status-card {
+.guide-grid div {
   padding: 18px;
   border-radius: 8px;
   background: #ffffff;
@@ -185,40 +184,135 @@ p {
   max-width: 1040px;
 }
 
-.status-grid {
+.status-hud {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
 }
 
-.status-card--wide {
-  grid-column: span 2;
+.status-hud__top,
+.status-hud__stats {
+  display: grid;
+  gap: 8px;
 }
 
-.status-card span,
+.status-hud__top {
+  grid-template-columns: 1.15fr 0.7fr 0.9fr;
+}
+
+.status-hud__top > div,
+.mini-stat,
+.status-hud__exp {
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.status-hud__top > div,
+.status-hud__exp {
+  padding: 9px 10px;
+}
+
+.status-hud__exp-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-hud__stats {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.mini-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+}
+
+.mini-stat--red {
+  border-color: rgba(220, 38, 38, 0.24);
+  background: #fef2f2;
+}
+
+.mini-stat--red strong {
+  color: #dc2626;
+}
+
+.mini-stat--green {
+  border-color: rgba(22, 163, 74, 0.24);
+  background: #f0fdf4;
+}
+
+.mini-stat--green strong {
+  color: #15803d;
+}
+
+.mini-stat--purple {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: #f5f3ff;
+}
+
+.mini-stat--purple strong {
+  color: #6d28d9;
+}
+
+.mini-stat--blue {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: #eff6ff;
+}
+
+.mini-stat--blue strong {
+  color: #1d4ed8;
+}
+
+.mini-stat--cyan {
+  border-color: rgba(8, 145, 178, 0.22);
+  background: #ecfeff;
+}
+
+.mini-stat--cyan strong {
+  color: #0e7490;
+}
+
+.mini-stat--gold {
+  border-color: rgba(183, 121, 31, 0.24);
+  background: #fffbeb;
+}
+
+.mini-stat--gold strong {
+  color: #b7791f;
+}
+
+.status-hud span,
 .panel-title {
   display: block;
-  margin-bottom: 6px;
   color: #64748b;
   font-size: 0.9rem;
   font-weight: 800;
 }
 
-.status-card strong {
-  display: block;
-  color: #172033;
-  font-size: 1.24rem;
+.panel-title {
+  margin-bottom: 6px;
 }
 
-.status-card small,
+.status-hud strong {
+  display: block;
+  color: #172033;
+  font-size: 1.08rem;
+  line-height: 1.18;
+}
+
 .muted {
   color: #64748b;
 }
 
 .progress-bar {
-  height: 12px;
-  margin-top: 10px;
+  height: 9px;
+  margin-top: 7px;
   overflow: hidden;
   border-radius: 999px;
   background: #dbeafe;
@@ -233,17 +327,18 @@ p {
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(240px, 330px) minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
 }
 
 .panel,
 .npc-card {
-  padding: 18px;
+  padding: 14px;
 }
 
 .character-panel {
+  overflow: hidden;
   text-align: center;
 }
 
@@ -256,26 +351,26 @@ p {
 
 .right-column {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .npc-card {
   display: flex;
   justify-content: space-between;
-  gap: 18px;
+  gap: 12px;
   align-items: center;
 }
 
 .npc-card h3 {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: #172033;
-  font-size: 1.5rem;
+  font-size: 1.28rem;
 }
 
 .npc-skill {
-  margin-top: 8px;
+  margin: 6px 0 0;
   color: #b7791f;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 800;
 }
 
@@ -288,8 +383,8 @@ p {
 .npc-meta span,
 .tag {
   border-radius: 999px;
-  padding: 7px 10px;
-  font-size: 0.86rem;
+  padding: 6px 9px;
+  font-size: 0.78rem;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -300,7 +395,7 @@ p {
 }
 
 .challenge-panel {
-  min-height: 310px;
+  min-height: 0;
 }
 
 .empty-challenge {
@@ -314,7 +409,7 @@ p {
 .reward-choice-list,
 .event-choice-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .reward-choice-list,
@@ -334,7 +429,7 @@ p {
   width: 100%;
   border: 1px solid rgba(37, 99, 235, 0.18);
   border-radius: 8px;
-  padding: 14px;
+  padding: 11px;
   text-align: left;
   cursor: pointer;
   background: #ffffff;
@@ -353,7 +448,7 @@ p {
 .route-card span,
 .reward-choice small {
   display: inline-flex;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border-radius: 999px;
   padding: 4px 8px;
   color: #734a00;
@@ -365,9 +460,9 @@ p {
 .route-card strong,
 .reward-choice strong {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: #172033;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
 }
 
 .route-card small,
@@ -375,6 +470,7 @@ p {
   display: block;
   color: #64748b;
   line-height: 1.42;
+  font-size: 0.86rem;
 }
 
 .route-card--event {
@@ -446,6 +542,30 @@ p {
   border-radius: 8px;
   color: #334155;
   background: #fff7ed;
+}
+
+.effect-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.effect-pill {
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.effect-pill--up {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.effect-pill--down {
+  color: #991b1b;
+  background: #fee2e2;
 }
 
 .card-table {
@@ -641,7 +761,6 @@ p {
 @media (max-width: 860px) {
   .hero,
   .game-layout,
-  .status-grid,
   .guide-grid,
   .side-panels {
     grid-template-columns: 1fr;
@@ -740,52 +859,50 @@ p {
     min-width: 54px;
   }
 
-  .status-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 10px;
+  .status-hud {
+    gap: 7px;
+    margin-bottom: 8px;
+    padding: 9px;
+    border-radius: 8px;
   }
 
-  .status-card {
-    padding: 10px;
-    min-height: 78px;
+  .status-hud__top {
+    grid-template-columns: 1.1fr 0.62fr 0.92fr;
+    gap: 6px;
   }
 
-  .status-card--wide {
-    grid-column: 1 / -1;
-    order: -1;
+  .status-hud__top > div,
+  .status-hud__exp {
+    padding: 7px 8px;
   }
 
-  .compact-stat {
-    min-height: 70px;
+  .status-hud__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
   }
 
-  .status-card span,
+  .mini-stat {
+    padding: 6px 7px;
+  }
+
+  .status-hud span,
   .panel-title {
     margin-bottom: 3px;
     font-size: 0.76rem;
   }
 
-  .status-card strong {
+  .status-hud strong {
     font-size: 1rem;
     line-height: 1.24;
   }
 
-  .status-card small {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    font-size: 0.76rem;
-  }
-
   .progress-bar {
-    height: 9px;
-    margin-top: 7px;
+    height: 7px;
+    margin-top: 5px;
   }
 
   .game-layout {
-    gap: 10px;
+    gap: 8px;
   }
 
   .panel,
@@ -798,11 +915,11 @@ p {
   }
 
   .character-panel {
-    padding: 8px 10px 10px;
+    padding: 6px 8px;
   }
 
   .character {
-    width: min(74vw, 260px);
+    width: min(60vw, 210px);
   }
 
   .character-caption {
@@ -843,12 +960,12 @@ p {
   }
 
   .right-column {
-    gap: 10px;
+    gap: 8px;
   }
 
   .challenge-panel {
-    min-height: 250px;
-    padding-bottom: 14px;
+    min-height: 0;
+    padding-bottom: 10px;
   }
 
   .route-grid {

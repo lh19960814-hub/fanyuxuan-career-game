@@ -18,6 +18,28 @@ const gameNameMap = {
   blackjack: '21 点简化版',
 };
 
+const statLabelMap = {
+  exp: '经验',
+  pressure: '压力',
+  reputation: '口碑',
+  paperwork: '材料',
+  social: '协调',
+  luck: '运气',
+  gossip: '谣言',
+  familyApproval: '家庭认可',
+};
+
+function formatEffect(effect = {}) {
+  return Object.entries(effect)
+    .filter(([, value]) => value !== 0)
+    .map(([key, value]) => ({
+      key,
+      label: statLabelMap[key] || key,
+      value,
+      text: `${statLabelMap[key] || key} ${value > 0 ? '+' : ''}${value}`,
+    }));
+}
+
 export default function GamePage({ player, setPlayer, onRestart }) {
   const [activeGame, setActiveGame] = useState(null);
   const [result, setResult] = useState(null);
@@ -85,6 +107,7 @@ export default function GamePage({ player, setPlayer, onRestart }) {
     setEventResult({
       title: choice.text,
       result: choice.result,
+      effects: formatEffect(choice.effect),
     });
   }
 
@@ -147,6 +170,15 @@ export default function GamePage({ player, setPlayer, onRestart }) {
                   <div className="game-result-inline">
                     <strong>{eventResult.title}</strong>
                     <span>{eventResult.result}</span>
+                    {eventResult.effects?.length > 0 && (
+                      <div className="effect-list">
+                        {eventResult.effects.map((effect) => (
+                          <span className={`effect-pill ${effect.value >= 0 ? 'effect-pill--up' : 'effect-pill--down'}`} key={effect.key}>
+                            {effect.text}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <button className="button button--primary" onClick={resetRound}>继续下一回合</button>
                   </div>
                 )}
