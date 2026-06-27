@@ -1,7 +1,15 @@
 import CartoonCharacter from './CartoonCharacter';
 import { createInitialQuizPlayer } from '../utils/quizGameLogic';
 
-export default function HomePage({ hasExistingSave, onStart, onContinue, onLevels, onGrowth }) {
+export default function HomePage({
+  hasExistingSave,
+  onStart,
+  onContinue,
+  onLevels,
+  onGrowth,
+  onRepairSave,
+  onClearSave,
+}) {
   return (
     <main className="home-page">
       <section className="hero">
@@ -15,6 +23,16 @@ export default function HomePage({ hasExistingSave, onStart, onContinue, onLevel
             <button className="button button--ghost" onClick={onLevels}>挑战路线</button>
             <button className="button button--ghost" onClick={onGrowth}>查看进度</button>
           </div>
+          {hasExistingSave && (
+            <details className="save-tools">
+              <summary>测试存档工具</summary>
+              <div>
+                <button className="button button--small button--secondary" onClick={onRepairSave}>修复存档</button>
+                <button className="button button--small button--ghost" onClick={onClearSave}>清空存档</button>
+              </div>
+              <p>如果朋友卡在某个 NPC、最终 Boss 没解锁，先点修复存档。</p>
+            </details>
+          )}
         </div>
         <CartoonCharacter player={createInitialQuizPlayer()} />
       </section>

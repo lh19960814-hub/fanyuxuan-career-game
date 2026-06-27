@@ -100,6 +100,34 @@ p {
   align-items: center;
 }
 
+.save-tools {
+  width: min(100%, 420px);
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(95, 111, 137, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  color: #475569;
+}
+
+.save-tools summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.save-tools div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.save-tools p {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+}
+
 .button {
   min-height: 44px;
   border: 0;
@@ -2229,6 +2257,13 @@ p {
   animation-duration: 4.2s;
 }
 
+.duel-player .character-portrait {
+  width: auto;
+  max-width: 100%;
+  max-height: 178px;
+  margin: 0 auto;
+}
+
 .duel-card .quiz-npc-avatar--big.quiz-npc-avatar--image {
   width: 136px;
   height: 136px;
@@ -2252,6 +2287,26 @@ p {
   font-weight: 700;
 }
 
+.duel-card--player-correct {
+  border-color: rgba(34, 197, 94, 0.45);
+  animation: playerAnswerPop 520ms ease both;
+}
+
+.duel-card--player-wrong {
+  border-color: rgba(239, 68, 68, 0.42);
+  animation: playerAnswerShake 480ms ease both;
+}
+
+.duel-card--npc-hit {
+  border-color: rgba(34, 197, 94, 0.34);
+  animation: npcHitShake 460ms ease both;
+}
+
+.duel-card--npc-power {
+  border-color: rgba(249, 115, 22, 0.45);
+  animation: npcPowerFlash 520ms ease both;
+}
+
 .duel-vs {
   display: grid;
   place-items: center;
@@ -2269,6 +2324,14 @@ p {
 .aura-wrap {
   display: grid;
   gap: 6px;
+}
+
+.aura-wrap--flash .aura-track {
+  animation: auraTrackFlash 620ms ease both;
+}
+
+.aura-wrap--flash .aura-track i {
+  animation: auraFillFlash 620ms ease both;
 }
 
 .aura-label {
@@ -2342,6 +2405,10 @@ p {
   animation: timerPulse 780ms ease-in-out infinite;
 }
 
+.duel-progress-line .timer-pill--critical {
+  animation: timerPulse 520ms ease-in-out infinite, timerShake 260ms linear infinite;
+}
+
 .duel-progress-line .combo-pill {
   justify-self: end;
 }
@@ -2356,6 +2423,109 @@ p {
   50% {
     transform: scale(1.06);
     box-shadow: 0 14px 30px rgba(239, 68, 68, 0.36);
+  }
+}
+
+@keyframes timerShake {
+  0%,
+  100% {
+    transform: translateX(0) scale(1.04);
+  }
+
+  25% {
+    transform: translateX(-2px) scale(1.06);
+  }
+
+  75% {
+    transform: translateX(2px) scale(1.06);
+  }
+}
+
+@keyframes playerAnswerPop {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  }
+
+  45% {
+    transform: translateY(-6px) scale(1.025);
+    box-shadow: 0 22px 48px rgba(34, 197, 94, 0.24);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  }
+}
+
+@keyframes playerAnswerShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-5px);
+  }
+
+  40% {
+    transform: translateX(5px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes npcHitShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  35% {
+    transform: translateX(5px) rotate(0.5deg);
+  }
+
+  70% {
+    transform: translateX(-4px) rotate(-0.5deg);
+  }
+}
+
+@keyframes npcPowerFlash {
+  0%,
+  100% {
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  }
+
+  45% {
+    box-shadow: 0 22px 48px rgba(249, 115, 22, 0.26);
+  }
+}
+
+@keyframes auraTrackFlash {
+  0%,
+  100% {
+    background: #e2e8f0;
+  }
+
+  40% {
+    background: #fef3c7;
+  }
+}
+
+@keyframes auraFillFlash {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  42% {
+    filter: brightness(1.28) saturate(1.25);
   }
 }
 
@@ -2568,6 +2738,27 @@ p {
   color: #1e40af;
 }
 
+.failure-reason {
+  display: grid;
+  gap: 4px;
+  margin: 14px auto;
+  padding: 12px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-radius: 14px;
+  background: #fff1f2;
+  color: #991b1b;
+  text-align: left;
+}
+
+.failure-reason strong {
+  font-size: 0.88rem;
+}
+
+.failure-reason span {
+  color: #7f1d1d;
+  font-weight: 800;
+}
+
 .route-report {
   margin-top: 14px;
   padding: 12px;
@@ -2694,6 +2885,10 @@ p {
 
   .duel-player .character {
     width: 76px;
+  }
+
+  .duel-player .character-portrait {
+    max-height: 108px;
   }
 
   .quiz-npc-avatar--big {

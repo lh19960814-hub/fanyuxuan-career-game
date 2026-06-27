@@ -7,7 +7,9 @@ import { quizNpcs } from './data/quizNpcs';
 import { clearSave, hasSave, loadSave, saveGame } from './utils/storage';
 import {
   createInitialQuizPlayer,
+  getFailureReason,
   migrateQuizPlayer,
+  repairQuizPlayer,
   settleQuizFailure,
   settleQuizVictory,
 } from './utils/quizGameLogic';
@@ -59,6 +61,33 @@ export default function App() {
     setScreen(nextPlayer.isCompleted ? 'complete' : 'route');
   }
 
+  function repairSave() {
+    const saved = loadSave();
+    if (!saved) return;
+
+    const repairedPlayer = repairQuizPlayer(migrateQuizPlayer(saved));
+    setPlayer(repairedPlayer);
+    saveGame(repairedPlayer);
+    setExistingSave(true);
+    setBattleResult(null);
+    setSelectedNpcId(null);
+    setScreen(repairedPlayer.isCompleted ? 'complete' : 'route');
+  }
+
+  function resetLocalSave() {
+    if (!window.confirm('确定要清空本机存档吗？清空后会回到新游戏状态。')) {
+      return;
+    }
+
+    clearSave();
+    const freshPlayer = createInitialQuizPlayer();
+    setPlayer(freshPlayer);
+    setExistingSave(false);
+    setSelectedNpcId(null);
+    setBattleResult(null);
+    setScreen('home');
+  }
+
   function openRoute() {
     setScreen('route');
   }
@@ -84,6 +113,7 @@ export default function App() {
 
   function handleLose(battle) {
     const nextPlayer = settleQuizFailure(player, battle);
+    const failureReason = getFailureReason(battle);
     setPlayer(nextPlayer);
     saveGame(nextPlayer);
     setBattleResult({
@@ -91,6 +121,7 @@ export default function App() {
       npc: selectedNpc,
       battle,
       reward: { cadreExp: 8 },
+      failureReason,
     });
     setScreen('result');
   }
@@ -141,6 +172,13 @@ export default function App() {
               : '这不是失败，这是范宇轩整理错题本的必要过程。'}
           </p>
 
+          {!won && (
+            <div className="failure-reason">
+              <strong>失败原因</strong>
+              <span>{battleResult.failureReason}</span>
+            </div>
+          )}
+
           <div className="completion-stats">
             <span>答对：{battleResult.battle.correct}</span>
             <span>答错：{battleResult.battle.wrong}</span>
@@ -184,6 +222,8 @@ export default function App() {
       onContinue={continueGame}
       onLevels={openRoute}
       onGrowth={openRoute}
+      onRepairSave={repairSave}
+      onClearSave={resetLocalSave}
     />
   );
 }

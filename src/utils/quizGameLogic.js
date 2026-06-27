@@ -37,10 +37,29 @@ export function migrateQuizPlayer(saved) {
     return createInitialQuizPlayer();
   }
 
-  return {
+  return repairQuizPlayer({
     ...createInitialQuizPlayer(),
     ...saved,
     version: QUIZ_VERSION,
+  });
+}
+
+export function repairQuizPlayer(player) {
+  const defeatedSet = new Set(player.defeatedNpcs || []);
+  const firstUndefeatedIndex = quizNpcs.findIndex((npc) => !defeatedSet.has(npc.id));
+  const repairedNpcIndex = firstUndefeatedIndex === -1 ? quizNpcs.length - 1 : firstUndefeatedIndex;
+  const repairedWinCount = Math.max(player.winCount || 0, defeatedSet.size);
+  const repairedLevelIndex = player.isCompleted
+    ? titles.length - 1
+    : Math.max(player.levelIndex || 0, getRankIndexByWins(repairedWinCount));
+
+  return {
+    ...player,
+    currentNpcIndex: repairedNpcIndex,
+    winCount: repairedWinCount,
+    levelIndex: repairedLevelIndex,
+    currentStage: titles[repairedLevelIndex]?.appearanceStage || 1,
+    isCompleted: player.isCompleted || defeatedSet.has('yang-shuyuan'),
   };
 }
 
@@ -53,17 +72,22 @@ export function getQuizSkill(player) {
 }
 
 export function getAvailableNpcs(player) {
+  const defeatedSet = new Set(player.defeatedNpcs || []);
+  const firstUndefeatedIndex = quizNpcs.findIndex((npc) => !defeatedSet.has(npc.id));
+  const currentIndex = firstUndefeatedIndex === -1 ? quizNpcs.length - 1 : firstUndefeatedIndex;
+
   return quizNpcs.map((npc, index) => ({
     ...npc,
     index,
-    unlocked: index <= player.currentNpcIndex || player.defeatedNpcs.includes(npc.id),
-    defeated: player.defeatedNpcs.includes(npc.id),
-    current: index === player.currentNpcIndex && !player.defeatedNpcs.includes(npc.id),
+    unlocked: index <= currentIndex || defeatedSet.has(npc.id),
+    defeated: defeatedSet.has(npc.id),
+    current: index === currentIndex && !defeatedSet.has(npc.id),
   }));
 }
 
 export function getCurrentQuizNpc(player) {
-  return quizNpcs[Math.min(player.currentNpcIndex, quizNpcs.length - 1)];
+  const available = getAvailableNpcs(player);
+  return available.find((npc) => npc.current) || quizNpcs[Math.min(player.currentNpcIndex, quizNpcs.length - 1)];
 }
 
 export function buildBattleState(npc, answeredQuestionTexts = []) {
@@ -169,7 +193,9 @@ export function settleQuizVictory(player, npc, battle) {
     ? player.defeatedNpcs
     : [...player.defeatedNpcs, npc.id];
 
-  const nextNpcIndex = Math.min(player.currentNpcIndex + 1, quizNpcs.length - 1);
+  const defeatedSet = new Set(defeatedNpcs);
+  const firstUndefeatedIndex = quizNpcs.findIndex((item) => !defeatedSet.has(item.id));
+  const nextNpcIndex = firstUndefeatedIndex === -1 ? quizNpcs.length - 1 : firstUndefeatedIndex;
   const winCount = player.winCount + 1;
   const nextLevelIndex = npc.id === 'yang-shuyuan'
     ? titles.length - 1
@@ -219,7 +245,27 @@ export function settleQuizFailure(player, battle) {
     totalWrong: player.totalWrong + battle.wrong,
     bestStreak: Math.max(player.bestStreak || 0, battle.bestStreak),
     answeredQuestionTexts: mergeAnsweredQuestions(player, battle),
-  };
+};
+}
+
+export function getFailureReason(battle) {
+  if (battle.finishReason === 'playerAuraZero') {
+    if (battle.lastMistake === 'timeout') {
+      return '倒计时归零导致范哥气势见底，本题判错后没能撑住擂台。';
+    }
+
+    return '范哥气势被扣到 0，对手暂时守住了擂台。';
+  }
+
+  if (battle.finishReason === 'questionsEndedBehind') {
+    return '6 道题全部答完后，范哥剩余气势低于对手，所以本轮惜败。';
+  }
+
+  if (battle.finishReason === 'skillBackfire') {
+    return '技能没有形成击杀，对手的气势仍然占优。';
+  }
+
+  return '本轮答题节奏略乱，范哥需要整理错题本再冲一次。';
 }
 
 export function getNpcSkillNote(npc) {

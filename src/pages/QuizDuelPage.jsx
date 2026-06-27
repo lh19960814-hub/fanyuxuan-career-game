@@ -7,10 +7,10 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function AuraBar({ label, value, max }) {
+function AuraBar({ label, value, max, flash }) {
   const percent = clamp(Math.round((value / max) * 100), 0, 100);
   return (
-    <div className="aura-wrap">
+    <div className={`aura-wrap ${flash ? 'aura-wrap--flash' : ''}`}>
       <div className="aura-label">
         <span>{label}</span>
         <strong>{Math.max(0, value)}</strong>
@@ -24,6 +24,18 @@ function AuraBar({ label, value, max }) {
 
 const QUESTIONS_PER_DUEL = 6;
 const QUESTION_TIME_LIMIT = 15;
+
+function getTimerClass(timeLeft) {
+  if (timeLeft <= 3) return 'timer-pill timer-pill--danger timer-pill--critical';
+  if (timeLeft <= 5) return 'timer-pill timer-pill--danger';
+  return 'timer-pill';
+}
+
+function getComboMessage(streak) {
+  if (streak >= 3) return '范哥开始控场';
+  if (streak >= 2) return '范哥状态来了';
+  return '';
+}
 
 export default function QuizDuelPage({ player, npc, onBack, onWin, onLose }) {
   const [battle, setBattle] = useState(() => buildBattleState(npc, player.answeredQuestionTexts));
@@ -67,13 +79,24 @@ export default function QuizDuelPage({ player, npc, onBack, onWin, onLose }) {
 
   function finishIfNeeded(nextBattle) {
     if (nextBattle.npcAura <= 0) {
-      onWin(nextBattle);
+      onWin({ ...nextBattle, finishReason: 'npcAuraZero' });
       return true;
     }
-    if (nextBattle.playerAura <= 0 || nextBattle.questionIndex >= QUESTIONS_PER_DUEL) {
-      onLose(nextBattle);
+
+    if (nextBattle.playerAura <= 0) {
+      onLose({ ...nextBattle, finishReason: 'playerAuraZero' });
       return true;
     }
+
+    if (nextBattle.questionIndex >= QUESTIONS_PER_DUEL) {
+      if (nextBattle.playerAura >= nextBattle.npcAura) {
+        onWin({ ...nextBattle, finishReason: 'questionsEndedLead' });
+      } else {
+        onLose({ ...nextBattle, finishReason: 'questionsEndedBehind' });
+      }
+      return true;
+    }
+
     return false;
   }
 
@@ -155,6 +178,7 @@ export default function QuizDuelPage({ player, npc, onBack, onWin, onLose }) {
       answeredQuestionTexts: [...battle.answeredQuestionTexts, question.text],
       hiddenOptions: [],
       skillMode: battle.skillMode === 'doubleNext' ? 'doubleNext' : null,
+      lastMistake: isCorrect ? null : 'wrong',
       log: [
         ...battle.log,
         isCorrect ? `答对！${npc.name}气势 -${damage}。` : `答错，范哥气势 -${wrongDamage}。`,
@@ -192,6 +216,8 @@ export default function QuizDuelPage({ player, npc, onBack, onWin, onLose }) {
       answeredQuestionTexts: [...battle.answeredQuestionTexts, question.text],
       hiddenOptions: [],
       skillMode: battle.skillMode === 'doubleNext' ? 'doubleNext' : null,
+      lastMistake: 'timeout',
+      timeoutCount: (battle.timeoutCount || 0) + 1,
       log: [...battle.log, `倒计时结束，本题判错，范哥气势 -${wrongDamage}。`],
     };
 
@@ -313,29 +339,29 @@ export default function QuizDuelPage({ player, npc, onBack, onWin, onLose }) {
       </section>
 
       <section className="duel-stage">
-        <div className="duel-player duel-card">
+        <div className={`duel-player duel-card ${feedback?.isCorrect ? 'duel-card--player-correct' : ''} ${feedback && !feedback.isCorrect ? 'duel-card--player-wrong' : ''}`}>
           <div className="duel-figure duel-figure--player">
             <CartoonCharacter player={player} size="small" />
           </div>
           <h2>范宇轩</h2>
           <p>{player.levelIndex === 0 ? '实习生' : '晋升挑战者'}</p>
-          <AuraBar label="范哥气势" value={battle.playerAura} max={playerMaxAura} />
+          <AuraBar label="范哥气势" value={battle.playerAura} max={playerMaxAura} flash={feedback?.isCorrect} />
         </div>
         <div className="duel-vs">VS</div>
-        <div className="duel-npc duel-card">
+        <div className={`duel-npc duel-card ${feedback?.isCorrect ? 'duel-card--npc-hit' : ''} ${feedback && !feedback.isCorrect ? 'duel-card--npc-power' : ''}`}>
           <div className="duel-figure">
             <NpcAvatar npc={npc} size="big" />
           </div>
           <h2>{npc.name}</h2>
           <p>{npc.title}</p>
-          <AuraBar label="对手气势" value={battle.npcAura} max={npcMaxAura} />
+          <AuraBar label="对手气势" value={battle.npcAura} max={npcMaxAura} flash={feedback && !feedback.isCorrect} />
         </div>
       </section>
 
       <section className="question-panel">
         <div className="duel-progress-line">
           <span>题目进度 {Math.min(battle.questionIndex + 1, QUESTIONS_PER_DUEL)} / {QUESTIONS_PER_DUEL}</span>
-          <span className={timeLeft <= 5 ? 'timer-pill timer-pill--danger' : 'timer-pill'}>倒计时 {timeLeft}s</span>
+          <span className={getTimerClass(timeLeft)}>倒计时 {timeLeft}s</span>
           <span className="combo-pill">连击 {battle.streak}</span>
         </div>
         <div className="npc-skill-line">
@@ -358,12 +384,14 @@ export default function QuizDuelPage({ player, npc, onBack, onWin, onLose }) {
 
         {feedback && (
           <div className={`answer-feedback ${feedback.isCorrect ? 'answer-feedback--right' : 'answer-feedback--wrong'}`}>
-            <strong>{feedback.isCorrect ? '答对了，气势上涨！' : feedback.timedOut ? '时间到，本题算答错。' : '答错了，先稳一下。'}</strong>
+            <strong>{feedback.isCorrect ? '范哥开始发力！' : feedback.timedOut ? '时间到，范哥急了！' : '范哥急了！'}</strong>
             <div className="damage-pop-row">
               {feedback.isCorrect ? (
                 <>
                   <b className="damage-pop damage-pop--hit">对手气势 -{feedback.damage}</b>
-                  {feedback.streak >= 3 && <b className="damage-pop damage-pop--combo">{feedback.streak} 连击</b>}
+                  {getComboMessage(feedback.streak) && (
+                    <b className="damage-pop damage-pop--combo">{getComboMessage(feedback.streak)}</b>
+                  )}
                 </>
               ) : (
                 <b className="damage-pop damage-pop--hurt">范哥气势 -{Math.max(0, feedback.playerAuraBefore - feedback.playerAuraAfter)}</b>
