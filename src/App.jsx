@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import HomePage from './components/HomePage';
 import CompletionPage from './components/CompletionPage';
+import ShareCard from './components/ShareCard';
 import QuizRoutePage from './pages/QuizRoutePage';
 import QuizDuelPage from './pages/QuizDuelPage';
 import { quizNpcs } from './data/quizNpcs';
@@ -205,6 +206,13 @@ export default function App() {
               晋升战报已生成：范宇轩用 {battleResult.battle.correct} 次正确回答拿下本轮考核。
             </div>
           )}
+
+          <ShareCard
+            player={player}
+            npc={battleResult.npc}
+            battle={battleResult.battle}
+            status={battleResult.status}
+          />
 
           <div className="modal-actions">
             <button className="button button--primary" onClick={openRoute}>返回挑战路线</button>

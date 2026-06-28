@@ -1,4 +1,5 @@
 import CartoonCharacter from './CartoonCharacter';
+import ShareCard from './ShareCard';
 
 export default function CompletionPage({ player, onRestart }) {
   return (
@@ -21,6 +22,7 @@ export default function CompletionPage({ player, onRestart }) {
           <span>最终职级：厅级干部</span>
         </div>
         <p>朋友团轮番上擂台，范宇轩一路答题、一路晋升，最终完成厅级干部考核。此刻，全场起立，晋升路线正式闭环。</p>
+        <ShareCard player={player} final />
         <button className="button button--primary" onClick={onRestart}>重新开始</button>
         <button className="button button--ghost">高难模式开发中</button>
       </section>
