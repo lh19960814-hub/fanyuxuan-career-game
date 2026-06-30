@@ -6,7 +6,8 @@ import { quizSkills } from '../data/quizSkills';
 
 const QUIZ_VERSION = 'quiz-v1';
 const RANK_WIN_STEPS = [0, 1, 3, 5, 7, 9, 11, 12, 13];
-const DUEL_QUESTION_COUNT = 6;
+export const QUIZ_DUEL_QUESTION_COUNT = 12;
+const DUEL_QUESTION_COUNT = QUIZ_DUEL_QUESTION_COUNT;
 const NPC_EXCLUSIVE_COUNT = 3;
 
 export function createInitialQuizPlayer() {
@@ -27,6 +28,7 @@ export function createInitialQuizPlayer() {
     totalWrong: 0,
     bestStreak: 0,
     answeredQuestionTexts: [],
+    recentQuestionTextsByNpc: {},
     cadreExp: 0,
     isCompleted: false,
   };
@@ -59,6 +61,7 @@ export function repairQuizPlayer(player) {
     winCount: repairedWinCount,
     levelIndex: repairedLevelIndex,
     currentStage: titles[repairedLevelIndex]?.appearanceStage || 1,
+    recentQuestionTextsByNpc: player.recentQuestionTextsByNpc || {},
     isCompleted: player.isCompleted || defeatedSet.has('yang-shuyuan'),
   };
 }
@@ -90,12 +93,12 @@ export function getCurrentQuizNpc(player) {
   return available.find((npc) => npc.current) || quizNpcs[Math.min(player.currentNpcIndex, quizNpcs.length - 1)];
 }
 
-export function buildBattleState(npc, answeredQuestionTexts = []) {
+export function buildBattleState(npc, answeredQuestionTexts = [], recentQuestionTexts = []) {
   return {
     playerAura: 100,
     npcAura: npc.aura,
     questionIndex: 0,
-    questionDeck: createBattleQuestionDeck(npc, answeredQuestionTexts),
+    questionDeck: createBattleQuestionDeck(npc, answeredQuestionTexts, recentQuestionTexts),
     answeredQuestionTexts: [],
     correct: 0,
     wrong: 0,
@@ -110,20 +113,33 @@ export function buildBattleState(npc, answeredQuestionTexts = []) {
   };
 }
 
+export function getNpcDamageProfile(npc) {
+  const npcIndex = typeof npc.index === 'number'
+    ? npc.index
+    : Math.max(0, quizNpcs.findIndex((item) => item.id === npc.id));
+
+  return {
+    correctDamage: Math.max(8, 16 - Math.floor(npcIndex * 0.6)),
+    wrongDamage: 8 + Math.ceil((npc.difficulty || 1) * 1.2),
+  };
+}
+
 export function getQuestion(npc, battle) {
   return battle.questionDeck?.[battle.questionIndex] || battle.questionDeck?.[0] || npc.questions[0];
 }
 
-function createBattleQuestionDeck(npc, answeredQuestionTexts) {
+function createBattleQuestionDeck(npc, answeredQuestionTexts, recentQuestionTexts) {
   const answeredSet = new Set(answeredQuestionTexts);
-  const freshNpcQuestions = uniqueQuestions(npc.questions).filter((question) => !answeredSet.has(question.text));
-  const npcSource = freshNpcQuestions.length >= NPC_EXCLUSIVE_COUNT ? freshNpcQuestions : uniqueQuestions(npc.questions);
+  const recentSet = new Set(recentQuestionTexts);
+  const npcSource = getPreferredQuestionSource(uniqueQuestions(npc.questions), NPC_EXCLUSIVE_COUNT, answeredSet, recentSet);
   const npcQuestions = shuffleQuestions(npcSource).slice(0, NPC_EXCLUSIVE_COUNT);
   const usedTexts = new Set(npcQuestions.map((question) => question.text));
-  const freshPublicQuestions = uniqueQuestions(publicQuestions).filter((question) => !answeredSet.has(question.text));
-  const publicSource = freshPublicQuestions.length >= DUEL_QUESTION_COUNT - npcQuestions.length
-    ? freshPublicQuestions
-    : uniqueQuestions(publicQuestions);
+  const publicSource = getPreferredQuestionSource(
+    uniqueQuestions(publicQuestions).filter((question) => !usedTexts.has(question.text)),
+    DUEL_QUESTION_COUNT - npcQuestions.length,
+    answeredSet,
+    recentSet,
+  );
   const publicDeck = shuffleQuestions(publicSource)
     .filter((question) => !usedTexts.has(question.text))
     .slice(0, DUEL_QUESTION_COUNT - npcQuestions.length);
@@ -131,6 +147,18 @@ function createBattleQuestionDeck(npc, answeredQuestionTexts) {
   return shuffleQuestions([...npcQuestions, ...publicDeck])
     .slice(0, DUEL_QUESTION_COUNT)
     .map(shuffleQuestionOptions);
+}
+
+function getPreferredQuestionSource(questions, requiredCount, answeredSet, recentSet) {
+  const freshQuestions = questions.filter((question) => (
+    !answeredSet.has(question.text) && !recentSet.has(question.text)
+  ));
+  if (freshQuestions.length >= requiredCount) return freshQuestions;
+
+  const notRecentQuestions = questions.filter((question) => !recentSet.has(question.text));
+  if (notRecentQuestions.length >= requiredCount) return notRecentQuestions;
+
+  return notRecentQuestions.length ? notRecentQuestions : questions;
 }
 
 function uniqueQuestions(questions) {
@@ -207,6 +235,8 @@ export function settleQuizVictory(player, npc, battle) {
   const levelUps = nextLevelIndex > player.levelIndex
     ? [{ from: titles[player.levelIndex].name, to: titles[nextLevelIndex].name }]
     : [];
+  const recentQuestionTextsByNpc = { ...(player.recentQuestionTextsByNpc || {}) };
+  delete recentQuestionTextsByNpc[npc.id];
 
   return {
     player: {
@@ -222,6 +252,7 @@ export function settleQuizVictory(player, npc, battle) {
       totalWrong: player.totalWrong + battle.wrong,
       bestStreak: Math.max(player.bestStreak || 0, battle.bestStreak),
       answeredQuestionTexts: mergeAnsweredQuestions(player, battle),
+      recentQuestionTextsByNpc,
       equipments: equipment ? [...player.equipments, equipment.id] : player.equipments,
       isCompleted,
     },
@@ -236,7 +267,12 @@ export function settleQuizVictory(player, npc, battle) {
   };
 }
 
-export function settleQuizFailure(player, battle) {
+export function settleQuizFailure(player, npc, battle) {
+  const recentQuestionTextsByNpc = {
+    ...(player.recentQuestionTextsByNpc || {}),
+    [npc.id]: [...new Set(battle.answeredQuestionTexts || [])],
+  };
+
   return {
     ...player,
     loseCount: player.loseCount + 1,
@@ -245,7 +281,8 @@ export function settleQuizFailure(player, battle) {
     totalWrong: player.totalWrong + battle.wrong,
     bestStreak: Math.max(player.bestStreak || 0, battle.bestStreak),
     answeredQuestionTexts: mergeAnsweredQuestions(player, battle),
-};
+    recentQuestionTextsByNpc,
+  };
 }
 
 export function getFailureReason(battle) {
@@ -258,7 +295,7 @@ export function getFailureReason(battle) {
   }
 
   if (battle.finishReason === 'questionsEndedBehind') {
-    return '6 道题全部答完后，范哥剩余气势低于对手，所以本轮惜败。';
+    return `${QUIZ_DUEL_QUESTION_COUNT} 道题全部答完后，范哥剩余气势低于对手，所以本轮惜败。`;
   }
 
   if (battle.finishReason === 'skillBackfire') {

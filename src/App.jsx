@@ -113,7 +113,7 @@ export default function App() {
   }
 
   function handleLose(battle) {
-    const nextPlayer = settleQuizFailure(player, battle);
+    const nextPlayer = settleQuizFailure(player, selectedNpc, battle);
     const failureReason = getFailureReason(battle);
     setPlayer(nextPlayer);
     saveGame(nextPlayer);

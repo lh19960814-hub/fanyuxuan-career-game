@@ -20,13 +20,13 @@ export const quizSkills = [
   {
     rankIndex: 3,
     name: '紧急加班',
-    desc: '本题答对造成额外 18 点伤害。',
+    desc: '本题答对造成额外 8 点气势伤害。',
     type: 'bonusDamage',
   },
   {
     rankIndex: 4,
     name: '公文包拍桌',
-    desc: '直接削掉对手 22 点气势。',
+    desc: '直接削掉对手 14 点气势。',
     type: 'directDamage',
   },
   {
@@ -38,13 +38,13 @@ export const quizSkills = [
   {
     rankIndex: 6,
     name: '全员动员',
-    desc: '接下来两次答对伤害提升。',
+    desc: '接下来两次答对气势伤害小幅提升。',
     type: 'doubleNext',
   },
   {
     rankIndex: 7,
     name: '气场压制',
-    desc: '削弱对手 30 点气势，并恢复 12 点范哥气势。',
+    desc: '削弱对手 18 点气势，并恢复 10 点范哥气势。',
     type: 'auraCrush',
   },
   {

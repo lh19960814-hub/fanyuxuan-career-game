@@ -2210,13 +2210,112 @@ p {
   font-weight: 900;
 }
 
-.duel-stage {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 10px;
-  align-items: center;
+.duel-arena {
+  position: relative;
+  overflow: hidden;
   max-width: 980px;
   margin: 0 auto 10px;
+  padding: 12px 12px 72px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.2), rgba(15, 23, 42, 0.08) 36%, rgba(15, 23, 42, 0.26)),
+    radial-gradient(circle at 50% 64%, rgba(250, 204, 21, 0.22), transparent 28%),
+    var(--duel-arena-bg),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.94));
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.12);
+  isolation: isolate;
+}
+
+.duel-arena::before,
+.duel-arena::after {
+  position: absolute;
+  z-index: 0;
+  inset: auto 8% 20px;
+  height: 66px;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(255, 247, 237, 0.32), rgba(250, 204, 21, 0.12) 45%, transparent 72%);
+  content: '';
+  pointer-events: none;
+}
+
+.duel-arena::after {
+  inset: 0;
+  height: auto;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.18), transparent 22%, transparent 78%, rgba(15, 23, 42, 0.18));
+}
+
+.duel-arena__hud {
+  position: absolute;
+  z-index: 4;
+  right: 18px;
+  bottom: 14px;
+  left: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.58);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+.duel-arena__hud .aura-label {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.duel-arena__hud .aura-label strong {
+  color: #ffffff;
+}
+
+.duel-arena__hud .aura-track {
+  height: 10px;
+  background: rgba(226, 232, 240, 0.38);
+}
+
+.duel-arena__hud .timer-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 136px;
+  padding: 8px 14px;
+  border: 3px solid rgba(250, 204, 21, 0.82);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at top, rgba(250, 204, 21, 0.44), transparent 42%),
+    linear-gradient(135deg, #0f172a, #1d4ed8);
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.28);
+}
+
+.duel-arena__hud .timer-pill--danger {
+  border-color: rgba(254, 226, 226, 0.95);
+  background:
+    radial-gradient(circle at top, rgba(254, 226, 226, 0.5), transparent 42%),
+    linear-gradient(135deg, #ef4444, #991b1b);
+  animation: timerPulse 780ms ease-in-out infinite;
+}
+
+.duel-arena__hud .timer-pill--critical {
+  animation: timerPulse 520ms ease-in-out infinite, timerShake 260ms linear infinite;
+}
+
+.duel-stage {
+  position: relative;
+  z-index: 1;
+  display: block;
+  min-height: 330px;
+  margin: 0;
+  padding: 0;
 }
 
 .duel-player,
@@ -2232,19 +2331,37 @@ p {
 
 .duel-player,
 .duel-npc {
+  position: absolute;
+  bottom: 40px;
   display: grid;
-  align-content: start;
-  gap: 6px;
-  min-height: 278px;
-  padding: 12px;
+  justify-items: center;
+  gap: 0;
+  width: 32%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
   text-align: center;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.duel-player {
+  left: 0;
+}
+
+.duel-npc {
+  right: 0;
 }
 
 .duel-figure {
+  position: relative;
+  z-index: 2;
   display: grid;
   place-items: end center;
-  height: 150px;
-  margin-bottom: 2px;
+  height: 214px;
+  margin-bottom: -8px;
 }
 
 .duel-figure--player {
@@ -2252,26 +2369,36 @@ p {
 }
 
 .duel-player .character {
-  width: min(24vw, 118px);
+  width: min(23vw, 156px);
   margin: 0 auto;
   animation-duration: 4.2s;
+  filter: drop-shadow(0 18px 18px rgba(15, 23, 42, 0.28));
 }
 
 .duel-player .character-portrait {
   width: auto;
   max-width: 100%;
-  max-height: 178px;
+  max-height: 222px;
   margin: 0 auto;
 }
 
-.duel-card .quiz-npc-avatar--big.quiz-npc-avatar--image {
-  width: 136px;
-  height: 136px;
+.quiz-npc-avatar--scene {
+  overflow: visible;
+  width: min(27vw, 210px);
+  height: 220px;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #111827;
 }
 
-.duel-card .quiz-npc-avatar--big.quiz-npc-avatar--image img {
-  width: 128%;
-  height: 128%;
+.quiz-npc-avatar--scene.quiz-npc-avatar--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 18px rgba(15, 23, 42, 0.28));
 }
 
 .duel-card h2 {
@@ -2285,6 +2412,93 @@ p {
   color: #64748b;
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+.duel-nameplate {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 7px;
+  min-width: min(100%, 188px);
+  min-height: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  color: #1e3a8a;
+  text-align: left;
+  backdrop-filter: blur(8px);
+}
+
+.duel-nameplate span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 1000;
+}
+
+.duel-nameplate strong {
+  color: #111827;
+  font-size: 0.92rem;
+  line-height: 1.05;
+}
+
+.duel-nameplate em {
+  grid-column: 1 / -1;
+  display: block;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 900;
+  text-align: center;
+}
+
+.duel-nameplate--npc {
+  background: rgba(255, 247, 237, 0.74);
+  color: #9a3412;
+}
+
+.npc-reaction-bubble {
+  position: absolute;
+  z-index: 5;
+  top: 32%;
+  left: -30%;
+  max-width: 170px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 16px 16px 4px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22);
+  animation: damagePop 260ms ease both;
+}
+
+.npc-reaction-bubble::after {
+  position: absolute;
+  right: -7px;
+  bottom: 10px;
+  width: 14px;
+  height: 14px;
+  background: inherit;
+  border-right: 1px solid rgba(255, 255, 255, 0.54);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.54);
+  content: '';
+  transform: rotate(-45deg);
+}
+
+.npc-reaction-bubble--wrong {
+  background: rgba(22, 101, 52, 0.92);
+}
+
+.npc-reaction-bubble--win {
+  background: rgba(127, 29, 29, 0.92);
 }
 
 .duel-card--player-correct {
@@ -2308,17 +2522,220 @@ p {
 }
 
 .duel-vs {
+  position: absolute;
+  z-index: 2;
+  top: 48%;
+  left: 50%;
   display: grid;
   place-items: center;
   width: 58px;
   height: 58px;
-  margin: auto;
+  margin: 0;
   border-radius: 18px;
   background: #111827;
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.2);
   color: #facc15;
   font-size: 1.25rem;
   font-weight: 1000;
+  transform: translate(-50%, -50%);
+}
+
+.npc-skill-card {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.npc-skill-card--compact {
+  min-width: 0;
+  margin: 0;
+  padding: 7px 9px;
+  border-color: rgba(219, 234, 254, 0.9);
+  background: #f8fafc;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.npc-skill-card__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  background: #111827;
+  color: #facc15;
+  font-size: 0.95rem;
+  font-weight: 1000;
+}
+
+.npc-skill-card strong,
+.npc-skill-card span {
+  display: block;
+}
+
+.npc-skill-card strong {
+  margin-bottom: 3px;
+  color: #111827;
+  font-weight: 1000;
+}
+
+.npc-skill-card span {
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.npc-skill-card--compact .npc-skill-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+}
+
+.npc-skill-card--compact strong {
+  margin-bottom: 1px;
+  font-size: 0.84rem;
+}
+
+.npc-skill-card--compact span {
+  font-size: 0.76rem;
+}
+
+.npc-skill-card--danger .npc-skill-card__icon,
+.skill-burst--danger span {
+  background: linear-gradient(135deg, #991b1b, #ef4444);
+  color: #fff;
+}
+
+.npc-skill-card--soft .npc-skill-card__icon {
+  background: linear-gradient(135deg, #f9a8d4, #60a5fa);
+  color: #fff;
+}
+
+.npc-skill-card--blue .npc-skill-card__icon,
+.skill-burst--blue span {
+  background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+  color: #fff;
+}
+
+.npc-skill-card--gold .npc-skill-card__icon,
+.skill-burst--gold span {
+  background: linear-gradient(135deg, #92400e, #facc15);
+  color: #fff;
+}
+
+.npc-skill-card--orange .npc-skill-card__icon,
+.skill-burst--orange span {
+  background: linear-gradient(135deg, #c2410c, #fb923c);
+  color: #fff;
+}
+
+.npc-skill-card--green .npc-skill-card__icon,
+.skill-burst--green span {
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  color: #fff;
+}
+
+.npc-skill-card--purple .npc-skill-card__icon,
+.skill-burst--purple span {
+  background: linear-gradient(135deg, #581c87, #a855f7);
+  color: #fff;
+}
+
+.npc-skill-card--final .npc-skill-card__icon,
+.skill-burst--final span {
+  background: linear-gradient(135deg, #7c2d12, #f59e0b);
+  color: #fff;
+}
+
+.skill-burst {
+  position: absolute;
+  z-index: 3;
+  top: 72px;
+  left: 50%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  width: min(88%, 420px);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.24);
+  transform: translateX(-50%);
+  animation: skillBurstIn 520ms ease both;
+}
+
+.skill-burst--inline {
+  position: static;
+  width: auto;
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  transform: none;
+  animation: damagePop 360ms ease both;
+}
+
+.skill-burst--inline span {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  font-size: 0.82rem;
+}
+
+.skill-burst--inline p {
+  font-size: 0.8rem;
+}
+
+.skill-burst span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #facc15;
+  color: #111827;
+  font-weight: 1000;
+}
+
+.skill-burst strong,
+.skill-burst p {
+  margin: 0;
+}
+
+.skill-burst strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.96rem;
+}
+
+.skill-burst p {
+  color: #e2e8f0;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+@keyframes skillBurstIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
 
 .aura-wrap {
@@ -2371,6 +2788,14 @@ p {
   margin-bottom: 10px;
 }
 
+.duel-progress-line--compact {
+  grid-template-columns: 1fr auto;
+}
+
+.duel-progress-line--with-skill {
+  grid-template-columns: auto minmax(160px, 1fr) auto;
+}
+
 .duel-progress-line span {
   justify-self: start;
   padding: 7px 10px;
@@ -2411,6 +2836,13 @@ p {
 
 .duel-progress-line .combo-pill {
   justify-self: end;
+}
+
+.duel-progress-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
 }
 
 @keyframes timerPulse {
@@ -2612,6 +3044,27 @@ p {
   color: #991b1b;
 }
 
+.answer-feedback__top {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.answer-feedback__continue {
+  width: auto;
+  min-width: 118px;
+  padding-inline: 18px;
+}
+
+.answer-feedback__continue--top {
+  min-width: 150px;
+  min-height: 44px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  box-shadow: 0 16px 28px rgba(37, 99, 235, 0.24);
+}
+
 .damage-pop-row {
   display: flex;
   flex-wrap: wrap;
@@ -2805,9 +3258,9 @@ p {
 }
 
 .share-card__title {
-  top: 8.4%;
-  left: 11%;
-  right: 11%;
+  top: 8.2%;
+  left: 9%;
+  right: 9%;
   display: grid;
   gap: 2px;
   text-align: center;
@@ -2821,14 +3274,14 @@ p {
 
 .share-card__title strong {
   color: #92400e;
-  font-size: clamp(1.05rem, 5vw, 1.58rem);
+  font-size: clamp(0.96rem, 4.1vw, 1.28rem);
   line-height: 1.12;
 }
 
 .share-card__hero {
-  top: 24%;
+  top: 27.2%;
   left: 50%;
-  width: 44%;
+  width: 31%;
   transform: translateX(-50%);
 }
 
@@ -2838,29 +3291,40 @@ p {
 }
 
 .share-card__hero .character-portrait {
-  max-height: 310px;
+  max-height: 218px;
   object-fit: contain;
 }
 
 .share-card__result {
-  top: 56.6%;
-  left: 17%;
-  right: 17%;
+  top: 18.6%;
+  left: 22%;
+  right: 22%;
   display: grid;
-  gap: 2px;
+  gap: 1px;
+  padding: 5px 10px;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 251, 235, 0.72);
+  box-shadow: 0 10px 22px rgba(146, 64, 14, 0.12);
   text-align: center;
   color: #7c2d12;
+  backdrop-filter: blur(4px);
 }
 
 .share-card__result strong {
-  font-size: clamp(1rem, 4.2vw, 1.46rem);
-  line-height: 1.15;
+  font-size: clamp(0.88rem, 3.3vw, 1.1rem);
+  line-height: 1.08;
 }
 
 .share-card__result span {
   color: #92400e;
-  font-size: clamp(0.68rem, 2.5vw, 0.86rem);
+  font-size: clamp(0.52rem, 1.9vw, 0.64rem);
   font-weight: 900;
+}
+
+.share-card__result--lost {
+  border-color: rgba(239, 68, 68, 0.26);
+  background: rgba(254, 242, 242, 0.76);
 }
 
 .share-card__stats {
@@ -2871,24 +3335,48 @@ p {
 }
 
 .share-card__stats--top {
-  top: 66.8%;
-  left: 22%;
-  right: 5.5%;
+  top: 66.9%;
+  left: 24%;
+  right: 6.2%;
 }
 
 .share-card__stats--bottom {
-  top: 81.6%;
-  left: 6.8%;
-  right: 6.8%;
+  top: 82.6%;
+  right: auto;
+  left: 0;
+  display: block;
+  width: 100%;
 }
 
-.share-card__stats div {
+.share-card__stats div,
+.share-card__stat {
   display: grid;
   place-items: center;
-  min-height: 54px;
+  min-height: 48px;
   padding: 4px;
   border-radius: 10px;
   background: rgba(255, 251, 235, 0.58);
+}
+
+.share-card__stats--bottom .share-card__stat {
+  position: absolute;
+  min-height: 46px;
+  background: rgba(255, 251, 235, 0.5);
+}
+
+.share-card__stat--correct {
+  left: 8.2%;
+  width: 23.5%;
+}
+
+.share-card__stat--wrong {
+  left: 39%;
+  width: 22%;
+}
+
+.share-card__stat--aura {
+  left: 69%;
+  width: 23%;
 }
 
 .share-card__stats span,
@@ -2906,21 +3394,44 @@ p {
 }
 
 .share-card__npc {
-  top: 66.5%;
-  left: 6.2%;
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  width: 14%;
+  top: 67.8%;
+  left: 6.7%;
+  bottom: auto;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  width: 16%;
   color: #7c2d12;
-  text-align: center;
+  text-align: left;
 }
 
 .share-card__npc .quiz-npc-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
   border-width: 2px;
+}
+
+.share-card__npc div {
+  min-width: 0;
+}
+
+.share-card__npc span,
+.share-card__npc strong {
+  display: block;
+  overflow: hidden;
+  max-width: 42px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-card__npc span {
+  font-size: clamp(0.46rem, 1.5vw, 0.56rem);
+}
+
+.share-card__npc strong {
+  font-size: clamp(0.58rem, 2vw, 0.72rem);
 }
 
 .share-card__npc .quiz-npc-avatar--image img {
@@ -3036,28 +3547,136 @@ p {
     height: 132%;
   }
 
-  .duel-stage {
-    grid-template-columns: 1fr 38px 1fr;
+  .duel-arena {
+    padding: 9px 9px 58px;
+    border-radius: 17px;
+    background-position: center bottom;
+  }
+
+  .duel-arena__hud {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 6px;
+    padding: 6px;
+    border-radius: 13px;
+  }
+
+  .duel-arena__hud .timer-pill {
+    min-width: 78px;
+    padding: 7px 8px;
+    border-width: 2px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .duel-arena__hud .aura-label {
+    margin-bottom: 3px;
+    font-size: 0.64rem;
+  }
+
+  .duel-arena__hud .aura-track {
+    height: 7px;
+  }
+
+  .duel-arena__hud .aura-wrap {
+    width: 100%;
+  }
+
+  .npc-skill-card {
+    gap: 8px;
+    padding: 8px 9px;
+    border-radius: 14px;
+  }
+
+  .npc-skill-card--compact {
+    padding: 7px 8px;
+  }
+
+  .npc-skill-card__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    font-size: 0.86rem;
+  }
+
+  .npc-skill-card span {
+    font-size: 0.78rem;
+  }
+
+  .skill-burst {
+    padding: 9px;
+  }
+
+  .skill-burst span {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: 0.86rem;
+  }
+
+  .skill-burst p {
+    font-size: 0.78rem;
+  }
+
+  .duel-stage {
+    min-height: 230px;
+    padding: 0;
   }
 
   .duel-player,
   .duel-npc {
-    min-height: 208px;
-    padding: 10px 8px;
-    border-radius: 14px;
+    bottom: 26px;
+    width: 39%;
+    padding: 0;
+  }
+
+  .duel-player {
+    left: -2%;
+  }
+
+  .duel-npc {
+    right: -2%;
+  }
+
+  .duel-nameplate {
+    min-width: 118px;
+    padding: 5px 7px;
+  }
+
+  .duel-nameplate span {
+    font-size: 0.62rem;
+  }
+
+  .duel-nameplate strong {
+    font-size: 0.76rem;
+  }
+
+  .duel-nameplate em {
+    font-size: 0.62rem;
+  }
+
+  .npc-reaction-bubble {
+    top: 24%;
+    left: -18%;
+    max-width: 118px;
+    padding: 7px 8px;
+    border-radius: 12px 12px 4px;
+    font-size: 0.68rem;
   }
 
   .duel-figure {
-    height: 96px;
+    height: 142px;
+    margin-bottom: -5px;
   }
 
   .duel-player .character {
-    width: 76px;
+    width: 94px;
   }
 
   .duel-player .character-portrait {
-    max-height: 108px;
+    max-height: 150px;
   }
 
   .quiz-npc-avatar--big {
@@ -3072,6 +3691,11 @@ p {
     width: 90px;
     height: 90px;
     border-radius: 24px;
+  }
+
+  .quiz-npc-avatar--scene {
+    width: 118px;
+    height: 148px;
   }
 
   .duel-card h2,
@@ -3089,11 +3713,31 @@ p {
     height: 42px;
     border-radius: 14px;
     font-size: 0.9rem;
+    top: 50%;
   }
 
   .question-panel {
     padding: 12px;
     border-radius: 14px;
+  }
+
+  .duel-progress-line--compact {
+    grid-template-columns: 1fr auto;
+  }
+
+  .duel-progress-line--with-skill {
+    grid-template-columns: auto minmax(92px, 1fr) auto;
+  }
+
+  .duel-progress-action {
+    min-height: 34px;
+  }
+
+  .answer-feedback__continue--top {
+    min-width: 88px;
+    min-height: 34px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
   }
 
   .npc-skill-line {

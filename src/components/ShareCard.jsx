@@ -10,13 +10,13 @@ function getAccuracy(correct = 0, wrong = 0) {
 
 export default function ShareCard({ player, npc, battle, status = 'won', final = false }) {
   const rank = final ? { name: '厅级干部' } : getCurrentRank(player);
-  const correct = final ? player.totalCorrect || 0 : battle?.correct || 0;
-  const wrong = final ? player.totalWrong || 0 : battle?.wrong || 0;
+  const correct = player.totalCorrect || battle?.correct || 0;
+  const wrong = player.totalWrong || battle?.wrong || 0;
   const accuracy = getAccuracy(correct, wrong);
   const won = final || status === 'won';
-  const title = final ? '厅级干部通关战报' : won ? '范哥拿下本轮擂台' : '范哥整理错题本中';
+  const title = final ? '厅级干部通关战报' : won ? '范哥拿捏你不轻轻松松的？' : '范哥整理错题本中';
   const targetName = final ? '最终考核' : npc?.name || '神秘对手';
-  const resultText = final ? '最终晋升成功' : won ? `击败 ${targetName}` : `惜败 ${targetName}`;
+  const resultText = final ? '最终晋升成功' : won ? `干趴了 ${targetName}` : `惜败 ${targetName}`;
 
   return (
     <section className="share-card-wrap" aria-label="战绩分享卡">
@@ -32,9 +32,9 @@ export default function ShareCard({ player, npc, battle, status = 'won', final =
           <CartoonCharacter player={player} size="small" />
         </div>
 
-        <div className="share-card__result">
+        <div className={`share-card__result ${won ? 'share-card__result--won' : 'share-card__result--lost'}`}>
+          <span>{won ? '本轮战报' : '复盘时刻'}</span>
           <strong>{resultText}</strong>
-          <span>{won ? '没人能影响我的仕途' : '下一把范哥要开始发力'}</span>
         </div>
 
         <div className="share-card__stats share-card__stats--top">
@@ -53,15 +53,15 @@ export default function ShareCard({ player, npc, battle, status = 'won', final =
         </div>
 
         <div className="share-card__stats share-card__stats--bottom">
-          <div>
+          <div className="share-card__stat share-card__stat--correct">
             <span>答对</span>
             <strong>{correct}</strong>
           </div>
-          <div>
+          <div className="share-card__stat share-card__stat--wrong">
             <span>答错</span>
             <strong>{wrong}</strong>
           </div>
-          <div>
+          <div className="share-card__stat share-card__stat--aura">
             <span>{final ? '总胜场' : '范哥气势'}</span>
             <strong>{final ? player.winCount || 0 : Math.max(0, battle?.playerAura || 0)}</strong>
           </div>
